@@ -22,7 +22,10 @@ function renderSentence(sentence, typedText) {
         const typedChar = typedText[i];
         const expectedChar = sentence[i];
 
-        if (typedChar === undefined) {
+        if(i === typedText.length){
+            html += `<span id="caret"></span>`;
+        }
+        else if (typedChar === undefined) {
             // Untyped characters (gray)
             html += `<span style="color: gray; opacity: 0.5;">${expectedChar}</span>`;
         } else if (typedChar === expectedChar) {
