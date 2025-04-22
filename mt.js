@@ -39,13 +39,29 @@ function renderSentence(sentence, typedText) {
 
 // Start the timer when typing begins
 function startTimer() {
+    const duration = 15 * 1000;
     if (!startTime) {
-        startTime = Date.now();
-        timerInterval = setInterval(() => {
-            const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-            timerDisplay.textContent = elapsedSeconds;
-        }, 1000);
+        startTime = new Date().getTime();
     }
+
+
+    let remainingTime = duration;
+    timerDisplay.innerText = `${Math.floor(remainingTime / 1000)}`;
+
+    timerInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const elapsedTime = now - startTime;
+        remainingTime = Math.max(0, duration - elapsedTime);
+        const seconds = Math.floor(remainingTime / 1000);
+
+        timerDisplay.innerText = `${Math.floor(remainingTime / 1000)}`
+
+        if(remainingTime <= 0){
+            clearInterval(timerInterval);
+            timerDisplay.innerText = "Time's up!";
+            hiddenInput.disabled = true;
+        }
+    }, 1000)
 }
 
 // Load a new sentence and reset the state
@@ -56,6 +72,7 @@ async function loadNewState() {
     startTime = null; // Reset start time
     timerDisplay.textContent = "0"; // Reset timer display
     clearInterval(timerInterval); // Clear any previous timer
+    hiddenInput.disabled = false;
     hiddenInput.focus(); // Focus hidden input for typing
 }
 
@@ -67,7 +84,9 @@ hiddenInput.addEventListener("input", () => {
     sentenceDisplay.innerHTML = renderSentence(currentSentence, typedText);
 
     // Start the timer on the first keystroke
-    startTimer();
+    if(!startTime){
+        startTimer();
+    }
 });
 
 // Start button to load a new sentence
@@ -77,10 +96,14 @@ hiddenInput.addEventListener("input", () => {
 
 document.addEventListener("keydown", (e) => {
     if(e.key === "Tab"){
-        e.preventDefault();
+        e.preventDefault();  
+        if(timerInterval){
+            clearInterval(timerInterval);
+        }
         loadNewState();
     }
 })
 
 // Initialize on page load
 loadNewState();
+// startTimer();
